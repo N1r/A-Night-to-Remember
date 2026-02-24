@@ -180,7 +180,9 @@ class EnhancedSMCStrategy:
     """
     
     # Strategy parameters (optimized for Chinese market)
-    MIN_OB_OVERLAP = 30.0
+    #MIN_OB_OVERLAP = 30.0
+
+    MIN_OB_OVERLAP = 5.0
     STRONG_OVERLAP = 50.0
     VERY_STRONG_OVERLAP = 70.0
     MIN_RR_RATIO = 2.0
@@ -529,10 +531,14 @@ class EnhancedSMCStrategy:
             reasons.append(f"FVG方向一致 ({len(aligned_fvgs)}个)")
             confluence_factors.append("FVG一致")
         
-        # Check liquidity
+        # Check liquidity (Sweep is crucial for institutional entry)
+        if any(lvl.swept for lvl in result.liquidity_levels):
+            reasons.append("🔥 机构流动性掠夺 (Sweep)")
+            confluence_factors.append("Sweep")
+            
         if result.liquidity_levels:
-            reasons.append(f"流动性水平 ({len(result.liquidity_levels)}个)")
-            confluence_factors.append("流动性目标")
+            reasons.append(f"流动性储备 ({len(result.liquidity_levels)}个)")
+            confluence_factors.append("Liquidity")
         
         # Warnings
         warnings = []
@@ -657,8 +663,12 @@ class EnhancedSMCStrategy:
         else:
             score += ob.overlap_ratio * 0.5
         
-        # Confluence (max 20)
-        score += min(20, len(confluence_obs) * 8)
+        # Confluence (max 40) - 大幅提升权重
+        # 如果有 2 个 OB，给 30 分；3 个及以上给 40 分
+        if len(confluence_obs) >= 2:
+            score += 30 if len(confluence_obs) == 2 else 40
+        else:
+            score += len(confluence_obs) * 5
         
         # Zone alignment (max 15)
         if result.premium_discount == "discount" and ob.type == "bullish":
@@ -670,12 +680,24 @@ class EnhancedSMCStrategy:
         if result.trend == ob.type:
             score += 10
         
-        # Distance score (max 10)
-        score += distance_score * 0.1
+        # FVG Alignment (max 15) - 磁吸效应
+        if result.fvg_list:
+            aligned_fvgs = [f for f in result.fvg_list if not f.mitigated and f.type == ob.type]
+            if aligned_fvgs:
+                score += 15
         
-        # Volume score (max 8)
-        score += volume_score * 0.08
-        
+        # Liquidity Sweep (max 20) - 机构掠夺（扫损后拉回）
+        # 极高权重：代表机构在此处进行了止损狩猎
+        any_sweep = any(lvl.swept for lvl in result.liquidity_levels)
+        if any_sweep:
+            score += 20
+            
+        # Structure Break (max 10) - 结构打破确认
+        if result.structure_breaks:
+            recent_break = any(sb.index > len(result.ohlcv) - 15 for sb in result.structure_breaks)
+            if recent_break:
+                score += 10
+
         # Active OB count (max 7)
         active = sum(1 for o in result.order_blocks if not o.mitigated)
         score += min(7, active)
@@ -741,11 +763,11 @@ class EnhancedSMCStrategy:
         
         score = analysis.primary_signal.signal_strength * 0.5
         
-        # Multi-OB zones bonus
-        score += min(15, analysis.multi_ob_zones * 7)
+        # Multi-OB zones bonus (max 30) - 显著提升权重
+        score += min(30, analysis.multi_ob_zones * 15)
         
-        # High confluence OBs bonus
-        score += min(10, analysis.high_confluence_obs * 3)
+        # High confluence OBs bonus (显著提升)
+        score += min(15, analysis.high_confluence_obs * 5)
         
         # Active structure bonus
         active_obs = analysis.active_bullish_obs + analysis.active_bearish_obs
