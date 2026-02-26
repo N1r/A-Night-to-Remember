@@ -1,95 +1,15 @@
-# === Python 基础忽略项 ===
-__pycache__/
-*.py[cod]
-*$py.class
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
+# 1. 忽略所有文件
+*
 
-# === 虚拟环境 ===
-.venv/
-venv/
-ENV/
-env/
-python/
+# 2. 允许目录结构（这样才能搜到深层的 .py）
+!*/
 
-# === 环境变量与敏感信息 ===
-.env
-.venv
-pip-log.txt
-pip-delete-this-directory.txt
+# 3. 允许特定的后缀
+!*.py
+!*.js
+!*.md
+!.gitignore
 
-# === 操作系统与 IDE ===
-.vscode/
-.idea/
-.DS_Store
-Thumbs.db
-
-# === 项目特定：数据文件 (Project A & Others) ===
-**/data/
-**/raw/
-**/processed/
-**/intraday/
-**/single/
-*.csv
-*.xlsx
-*.sql
-*.sqlite
-
-# === 项目特定：输出与报告 (Project A & B) ===
-**/output/
-**/charts/
-**/reports/
-**/eval/
-**/backtest/
-*.log
-execution_report.md
-final_result.txt
-agent_history.json
-
-# === 项目特定：多媒体与杂项 (Project B) ===
-*.mp4
-*.jpg
-*.jpeg
-*.png
-*.gif
-**/browser_session/
-**/extensions_crx_cache/
-**/component_crx_cache/
-**/GraphiteDawnCache/
-**/GrShaderCache/
-**/ShaderCache/
-**/video/
-**/.claude/
-
-# === Project B: Code ===
-**/1_pre_processing/
-**/2_mid_processing/
-**/3_post_processing/
-**/archives/
-**/configs/
-**/docs/
-**/shared/
-**/storage/
-**/web_ui/
-
-# === 临时文件 ===
-*.tmp
-*.bak
-*.swp
-*.html
+# 4. 【关键】显式禁止 yaml（防止目录放行规则产生冲突）
+*.yaml
+*.yml

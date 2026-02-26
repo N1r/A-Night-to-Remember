@@ -1,1 +1,0 @@
-conda env smc_env

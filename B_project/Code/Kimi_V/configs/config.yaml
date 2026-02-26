@@ -1,0 +1,107 @@
+# =================================================================
+# VideoLingo 核心配置文件
+# =================================================================
+
+# [领域设置]
+domain: politics                  # 当前运行领域 (如: politics, tech, general)
+display_language: zh-CN           # 显示语言
+max_workers: 6                     # 并行处理的最大工作线程数
+model_dir: ./_model_cache         # 模型缓存路径
+
+# [媒体设置]
+ffmpeg_gpu: true                  # 是否启用 FFmpeg GPU 加速 (VAAPI)
+allowed_video_formats: [mp4, mov, avi, mkv, flv, wmv, webm]
+allowed_audio_formats: [wav, mp3, flac, m4a]
+
+# [大语言模型 API]
+api:
+  base_url: https://api.longcat.chat/openai
+  key: ak_1lt5CC7fR0YP9l47On12532E7b78k
+  model: LongCat-Flash-Lite
+  llm_support_json: false
+
+# [语音识别 - Whisper]
+whisper:
+  runtime: deepgram               # 模式: deepgram | local | cloud | elevenlabs
+  model: large-v3                 # 仅 local 模式使用
+  language: en                    # 默认源语言
+  detected_language: en           # 自动识别结果（运行中更新）
+  deepgram_api_key: fe31ab3476dcf769654e8552b33b484ad6f10b5a
+  whisperX_302_api_key: sk-2hQb4lo4JuCdWWCflcN41jddIIQzhtSi78Qeb7vWOM40XSkJ
+  elevenlabs_api_key: your_elevenlabs_api_key
+
+# [NLP 与文本处理]
+spacy_model_map:
+  de: de_core_news_md
+  en: en_core_web_md
+  es: es_core_news_md
+  fr: fr_core_news_md
+  it: it_core_news_md
+  ja: ja_core_news_md
+  ru: ru_core_news_md
+  zh: zh_core_web_md
+
+language_split_with_space: [en, es, fr, de, it, ru]
+language_split_without_space: [zh, ja]
+max_split_length: 20
+summary_length: 8000
+
+# [翻译设置]
+target_language: 简体中文         # 目标翻译语言
+reflect_translate: false          # 是否开启反思式翻译 (双轮对话)
+pause_before_translate: false     # 翻译前是否手动确认
+
+# [字幕与渲染]
+subtitle_style: bbc               # 回退样式 (优先从 aesthetics.yaml preset 读取)
+burn_subtitles: true              # 是否烧录字幕到视频
+tolerance: 1.5                    # 时间轴对齐容差
+min_subtitle_duration: 2.5        # 字幕最短持续时间
+min_trim_duration: 3.5            # 触发精简逻辑的阈值
+
+subtitle:                         # 详细限制设置
+  max_length: 75
+  target_multiplier: 1.2
+
+# [语音合成 - TTS]
+tts_method: azure_tts             # 模式: azure_tts | edge_tts | openai_tts | fish_tts | gpt_sovits
+speed_factor:
+  min: 1
+  max: 1.4
+  accept: 1.2
+
+azure_tts:
+  api_key: sk-2hQb4lo4JuCdWWCflcN41jddIIQzhtSi78Qeb7vWOM40XSkJ
+  voice: zh-CN-YunjianNeural
+edge_tts:
+  voice: zh-CN-XiaoxiaoNeural
+openai_tts:
+  api_key: YOUR_302_API_KEY
+  voice: alloy
+fish_tts:
+  api_key: YOUR_302_API_KEY
+  character: AD学姐
+  character_id_dict:
+    AD学姐: 7f92f8afb8ec43bf81429cc1c9199cb1
+    丁真: 54a5170264694bfc8e9ad98df7bd89c3
+gpt_sovits:
+  character: Huanyuv2
+  refer_mode: 3
+
+# [抓取设置 - Scrapers]
+ytb_resolution: '1080'
+youtube:
+  cookies_path: cookies.txt
+
+youtube_scrapers:
+  api_key: 'AIzaSyDMVvDeq4xHWFpTh5hGRiZoBettBqrSbcs'
+  concurrent_limit: 5
+
+# [云存储服务]
+tencent_cos:
+  secret_id: 'AKIDUwDH9qKbf5KNiz73pRxIBvsfHhvyoUyG'
+  secret_key: 'A6qW4QaEksvmSvEKG9ye9a1LVVUNJ4f4'
+  region: 'eu-frankfurt'
+  bucket: 'adingding-1254193240'
+
+# [其他增强]
+demucs: false                     # 是否开启人声增强分离
