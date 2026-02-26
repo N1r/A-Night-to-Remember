@@ -74,6 +74,19 @@ agent_history.json
 **/GraphiteDawnCache/
 **/GrShaderCache/
 **/ShaderCache/
+**/video/
+**/.claude/
+
+# === Project B: Code ===
+**/1_pre_processing/
+**/2_mid_processing/
+**/3_post_processing/
+**/archives/
+**/configs/
+**/docs/
+**/shared/
+**/storage/
+**/web_ui/
 
 # === 临时文件 ===
 *.tmp

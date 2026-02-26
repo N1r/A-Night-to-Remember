@@ -1,0 +1,54 @@
+*.log
+# 排除视频文件
+*.mp4
+*.avi
+*.mov
+*.mkv
+# 排除临时文件和日志
+*.tmp
+*.bak
+./logs/*
+# 排除视频文件
+*.mp4
+*.avi
+*.mov
+*.mkv
+# 排除临时文件和日志
+*.tmp
+*.bak
+./logs/*
+client_secrets.json
+*.pickle
+
+batch/browser_data/
+batch/debug_douyin/
+batch/debug_tencent/
+**/__pycache__/
+*.png
+*.pyc
+*.log*
+
+# Python 缓存
+__pycache__/
+*.pyc
+
+# 字体文件 (建议单独管理，不要塞进代码库)
+*.otf
+*.ttf
+*.woff2
+
+# 运行状态与敏感信息
+*.json
+*.xlsx
+*.yaml
+# 如果某些 yaml/json 是配置必需，可以用 !config.yaml 排除掉
+!config.yaml 
+
+# 临时备份文件
+*copy.py
+*_bk.py
+*_bk1.py
+
+# 输出目录
+batch/output/
+F

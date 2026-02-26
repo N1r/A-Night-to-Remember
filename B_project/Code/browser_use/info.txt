@@ -1,0 +1,12 @@
+目标url:https://c.alipay.com/page/content-creation/publish/short-video?appId=2030080880492910
+
+cookies:receive-cookie-deprecation=1; cna=Y00jIrbnEVoCAZFrqHMzK27T; iw.userid="K1iSL1gljnSeTFiAFcS75A=="; mobileSendTime=-1; credibleMobileSendTime=-1; ctuMobileSendTime=-1; riskMobileBankSendTime=-1; riskMobileAccoutSendTime=-1; riskMobileCreditSendTime=-1; riskCredibleMobileSendTime=-1; riskOriginalAccountMobileSendTime=-1; auth_goto_http_type=https; umt=L706e8c8d3a068655841a07587bd863cf; ctoken=hc1KRF1rMw6arJQV; _CHIPS-ctoken=hc1KRF1rMw6arJQV; LoginForm=alipay_login_home; alipay="K1iSL1gljnSeTFiAFcS75NFbibmz0m3Zu1T9biH30A=="; CLUB_ALIPAY_COM=2088122419369911; ali_apache_tracktmp="uid=2088122419369911"; auth_jwt=e30.eyJleHAiOjE3NzE4NjU1OTM1ODgsInJsIjoiNSwwLDI3LDE5LDI4LDMwLDEzLDEwIiwic2N0IjoicnU1NzY1ZGFWTlFaSXBzRTNLekdVU0VnYWdEcTRGZzJKMHg3TEFvIiwidWlkIjoiMjA4ODEyMjQxOTM2OTkxMSJ9.W-9IOO0B5Tw-BDPVBkE-hOCgHgCcOopC0aZhEipqmDk; session.cookieNameId=ALIPAYJSESSIONID; _CHIPS-session.cookieNameId=ALIPAYJSESSIONID; _CHIPS-ALIPAYJSESSIONID=RZ42mkq8ypwdXl0Ai6hoNaZN9JJ2DaauthRZ42GZ00; ALIPAYJSESSIONID=RZ42mkq8ypwdXl0Ai6hoNaZN9JJ2DaauthRZ42GZ00; rtk=RUZuKj8EFejHfF0eOUaszpreQAbR/wrDpIfnM3lf6S+D/weH6pZ; __TRACERT_COOKIE_bucUserId=2088122419369911; zone=GZ00F; ALI_PAMIR_SID="U9178+XaUS7521GA0Vmy933yjkx#ggLB/JwlTTCHYo5YnMUx5zkx"; 752459860=DNEXfWnb6SUwoZUnQ1o2jCeCLxtTWOxlvHrbpxbs6SDd; spanner=cts1fDgVFWoX1NfufSkQzPk/lT/sQB7x; jsh_t_c_e=jsh_t_0.8871235144886322
+
+
+* 请你帮我构建一个工作流。1 使用 browser_use agent 模式 登陆并且上传视频到
+  支付宝创作中心。必要信息在 info.txt, 我已经配置了browser_agent
+  使用qwen模型来。 将全部都history 都保存到 一个json中。
+  反复尝试直到成功完成任务。 2.
+  将json中正确且准确的操作记录，整理为一个可反复使用的playwright.py 代码。
+
+  skills在qwen根目录 ​
