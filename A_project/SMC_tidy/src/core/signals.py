@@ -24,141 +24,11 @@ from .types import (
     StructureBreak, BreakType,
     MarketState, ZoneType, TrendDirection,
     AnalysisOutput, SignalType,
+    InstitutionalSignal,
 )
-from .engine import AnalysisOutput
+from .base_strategy import BaseStrategy
 
 logger = logging.getLogger(__name__)
-
-
-@dataclass
-class InstitutionalSignal:
-    """
-    机构级交易信号数据结构
-    
-    包含完整的交易参数、风险评估和决策依据，
-    符合机构交易员的信息需求。
-    
-    核心参数:
-        - 入场价、止损价、止盈目标
-        - 风险回报比 (R:R)
-        - 建议仓位百分比
-        
-    信号评估:
-        - 信号强度评分 (0-100)
-        - 置信度评分 (0-100)
-        - 胜率预估
-        
-    风险指标:
-        - 风险评分 (0-100, 越高风险越大)
-        - 最大回撤预估
-        - 建议仓位
-    """
-    symbol: str
-    name: str = ""
-    timestamp: datetime = field(default_factory=datetime.now)
-    timeframe: str = "daily"
-    
-    # 基础信号信息
-    signal_type: SignalType = SignalType.NEUTRAL
-    direction: str = "neutral"
-    
-    # 交易参数
-    entry_price: float = 0.0
-    stop_loss: float = 0.0
-    take_profit_1: float = 0.0    # 目标1 (2R)
-    take_profit_2: float = 0.0    # 目标2 (3R)
-    take_profit_3: float = 0.0    # 目标3 (5R)
-    
-    # 风险参数
-    risk_reward_ratio: float = 0.0
-    risk_amount: float = 0.0      # 单位风险 (入场-止损)
-    risk_percent: float = 2.0     # 建议风险百分比
-    
-    # 信号评分
-    signal_strength: float = 0.0  # 信号强度 (0-100)
-    confidence: float = 0.0       # 置信度 (0-100)
-    estimated_win_rate: float = 0.0  # 预估胜率
-    
-    # OB 分析
-    ob_overlap_score: float = 0.0
-    ob_confluence_count: int = 0
-    ob_distance_score: float = 0.0
-    ob_volume_score: float = 0.0
-    
-    # 市场状态
-    trend: TrendDirection = TrendDirection.NEUTRAL
-    zone: ZoneType = ZoneType.EQUILIBRIUM
-    fvg_alignment: bool = False
-    liquidity_sweep: bool = False
-    structure_break: bool = False
-    market_regime: str = "ranging"
-    
-    # 风险评估
-    risk_score: float = 0.0       # 综合风险评分
-    volatility_risk: float = 0.0
-    trend_risk: float = 0.0
-    position_size_pct: float = 0.0  # 建议仓位百分比
-    max_drawdown_risk: float = 0.0
-    
-    # 决策依据
-    reasons: List[str] = field(default_factory=list)
-    warnings: List[str] = field(default_factory=list)
-    confluence_factors: List[str] = field(default_factory=list)
-    
-    @property
-    def is_long(self) -> bool:
-        return self.signal_type == SignalType.LONG
-    
-    @property
-    def is_short(self) -> bool:
-        return self.signal_type == SignalType.SHORT
-    
-    @property
-    def is_actionable(self) -> bool:
-        return self.signal_type != SignalType.NEUTRAL and self.signal_strength >= 40
-    
-    @property
-    def risk_per_share(self) -> float:
-        """每股风险金额"""
-        return abs(self.entry_price - self.stop_loss)
-    
-    @property
-    def reward_per_share(self) -> float:
-        """每股潜在收益 (TP1)"""
-        return abs(self.take_profit_1 - self.entry_price)
-    
-    def to_dict(self) -> Dict[str, Any]:
-        """序列化为字典"""
-        return {
-            "symbol": self.symbol,
-            "name": self.name,
-            "timestamp": self.timestamp.isoformat(),
-            "timeframe": self.timeframe,
-            "signal_type": self.signal_type.value,
-            "direction": self.direction,
-            "entry_price": round(self.entry_price, 4),
-            "stop_loss": round(self.stop_loss, 4),
-            "take_profit_1": round(self.take_profit_1, 4),
-            "take_profit_2": round(self.take_profit_2, 4),
-            "take_profit_3": round(self.take_profit_3, 4),
-            "risk_reward_ratio": round(self.risk_reward_ratio, 2),
-            "signal_strength": round(self.signal_strength, 1),
-            "confidence": round(self.confidence, 1),
-            "estimated_win_rate": round(self.estimated_win_rate, 1),
-            "ob_overlap_score": round(self.ob_overlap_score, 1),
-            "ob_confluence_count": self.ob_confluence_count,
-            "trend": self.trend.value,
-            "zone": self.zone.value,
-            "fvg_alignment": self.fvg_alignment,
-            "liquidity_sweep": self.liquidity_sweep,
-            "structure_break": self.structure_break,
-            "risk_score": round(self.risk_score, 1),
-            "position_size_pct": round(self.position_size_pct, 2),
-            "reasons": self.reasons,
-            "warnings": self.warnings,
-            "confluence_factors": self.confluence_factors,
-            "is_actionable": self.is_actionable,
-        }
 
 
 class RiskManager:
@@ -401,7 +271,7 @@ class RiskManager:
         return min(100, risk)
 
 
-class SignalGenerator:
+class SignalGenerator(BaseStrategy):
     """
     交易信号生成器
     
@@ -427,6 +297,10 @@ class SignalGenerator:
         >>> print(signal.to_dict())
     """
     
+    @property
+    def name(self) -> str:
+        return "DefaultSMCStrategy"
+
     # 策略参数
     MIN_OB_OVERLAP = 15.0       # 最小OB重叠度 (降低阈值)
     STRONG_OB_OVERLAP = 30.0    # 强OB重叠度
@@ -450,6 +324,15 @@ class SignalGenerator:
         """
         self.risk_manager = risk_manager or RiskManager()
     
+    def generate_signal(
+        self,
+        output: AnalysisOutput,
+        symbol: str = "UNKNOWN",
+        name: str = "",
+    ) -> InstitutionalSignal:
+        """实现 BaseStrategy 接口"""
+        return self.generate(output, symbol, name)
+
     def generate(
         self,
         output: AnalysisOutput,

@@ -27,7 +27,6 @@ from .core import (
 # Orchestrator (New)
 from .orchestrator import (
     SMCOrchestrator,
-    OrchestratorConfig,
     AnalysisResult,
     analyze_from_file,
 )
@@ -94,7 +93,6 @@ __all__ = [
     "SignalType",
     # New Orchestrator
     "SMCOrchestrator",
-    "OrchestratorConfig",
     "AnalysisResult",
     "analyze_from_file",
     "create_summary_panel",

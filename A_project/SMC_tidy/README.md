@@ -14,28 +14,33 @@ pip install -r requirements.txt   # 首次使用
 ### 一键运行
 
 ```bash
-# 完整流程: 获取数据 → 分析 → 生成报告 → 启动 Web
-python one_click_v2.py --web
+# 完整流程: 获取数据 → 分析 → 生成报告
+python main.py analyze --a-stocks 500 --hk-stocks 200
+
+# 分析后自动启动 Web 界面
+python main.py analyze -a 50 -k 20 --web
 
 # 仅查看已有分析结果 (秒开)
-python one_click_v2.py --skip-fetch --web
+python main.py analyze --skip-fetch --web
+
+# 启动 Web 界面
+python main.py web --port 8080
 ```
 
-浏览器打开 `http://localhost:8080`，即可查看买入信号 Top 20 及对应的 SMC 图表。
-
----
-
-## 命令参数
+### 命令参数
 
 | 参数 | 缩写 | 说明 |
 |------|------|------|
+| `analyze` | | 运行分析流程 |
 | `--a-stocks N` | `-a N` | A股数量，默认 500 |
 | `--hk-stocks N` | `-k N` | 港股数量，默认 200 |
+| `--period` | `-p` | 时间周期 (daily, 60) |
 | `--force` | `-f` | 强制重新获取全部数据 |
 | `--skip-fetch` | | 跳过数据获取，只分析已有数据 |
 | `--no-charts` | | 不生成图表（加速分析） |
 | `--web` | `-w` | 完成后启动 Web 界面 |
-| `--port N` | `-p N` | Web 端口，默认 8080 |
+| `web` | | 仅启动 Web 界面 |
+| `--port N` | | Web 端口，默认 8080 |
 
 ### 常用组合
 

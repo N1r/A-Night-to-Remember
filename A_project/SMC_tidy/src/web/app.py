@@ -174,8 +174,8 @@ function toggle(id) {{
 </html>'''
 
 
-def setup_app() -> FastAPI:
-    """配置并返回 FastAPI 应用."""
+def setup_app():
+    """配置 FastAPI 应用."""
     config = get_config()
     charts_dir = config.charts_dir
     reports_dir = config.reports_dir
@@ -242,7 +242,7 @@ def setup_app() -> FastAPI:
 <div class="container">
     {stats_html}
     <div class="signal-list">
-        {cards_html if cards_html else '<div class="empty">暂无买入信号，请先运行 one_click_v2.py</div>'}
+        {cards_html if cards_html else '<div class="empty">暂无买入信号，请先运行 main.py analyze</div>'}
     </div>
 </div>'''
         return _render_page(f"SMC 买入信号 Top {TOP_N}", body)
@@ -262,10 +262,13 @@ def setup_app() -> FastAPI:
     return app
 
 
+# Setup app globally
+setup_app()
+
+
 def run_app(host: str = "0.0.0.0", port: int = 8080, reload: bool = False):
     """启动 Web 应用."""
     import uvicorn
-    setup_app()
     uvicorn.run(app, host=host, port=port, reload=reload, log_level="info")
 
 

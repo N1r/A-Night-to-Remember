@@ -26,50 +26,14 @@ from typing import Dict, List, Optional, Any, Tuple, Union
 import pandas as pd
 import numpy as np
 
+from .config import AppConfig, get_config
 from .core.engine import VectorizedSMCEngine, EngineConfig
 from .core.signals import SignalGenerator, RiskManager, InstitutionalSignal
+from .core.base_strategy import BaseStrategy
 from .core.visualizer import PremiumChartBuilder, create_summary_panel
 from .core.types import AnalysisOutput
 
 logger = logging.getLogger(__name__)
-
-
-@dataclass
-class OrchestratorConfig:
-    """Orchestrator 配置"""
-    # 路径配置
-    data_dir: Path = None
-    output_dir: Path = None
-    charts_dir: Path = None
-    reports_dir: Path = None
-    
-    # 引擎配置
-    swing_length: int = 50
-    swing_left: int = 10
-    swing_right: int = 10
-    
-    # 风险配置
-    account_size: float = 100000.0
-    risk_per_trade: float = 0.02
-    max_position_pct: float = 0.10
-    
-    # 图表配置
-    chart_height: int = 900
-    show_volume: bool = True
-    
-    def __post_init__(self):
-        if self.data_dir is None:
-            self.data_dir = Path("data/raw")
-        if self.output_dir is None:
-            self.output_dir = Path("output")
-        if self.charts_dir is None:
-            self.charts_dir = self.output_dir / "charts"
-        if self.reports_dir is None:
-            self.reports_dir = self.output_dir / "reports"
-        
-        # 确保目录存在
-        for d in [self.data_dir, self.output_dir, self.charts_dir, self.reports_dir]:
-            d.mkdir(parents=True, exist_ok=True)
 
 
 @dataclass
@@ -118,29 +82,39 @@ class SMCOrchestrator:
         >>> print(result.signal.to_dict())
     """
     
-    def __init__(self, config: Optional[OrchestratorConfig] = None):
+    def __init__(
+        self, 
+        config: Optional[AppConfig] = None,
+        strategy: Optional[BaseStrategy] = None
+    ):
         """
         初始化 Orchestrator
         
         Args:
-            config: 配置对象
+            config: 配置对象 (AppConfig)
+            strategy: 交易策略实现
         """
-        self.config = config or OrchestratorConfig()
+        self.config = config or get_config()
         
-        # 初始化各模块
+        # 初始化引擎 (优先使用 intraday 配置如果检测到相关后缀)
+        # 这里默认使用 daily 配置，后期可根据 timeframe 动态调整
+        s_cfg = self.config.smc
         engine_config = EngineConfig(
-            swing_length=self.config.swing_length,
-            swing_left=self.config.swing_left,
-            swing_right=self.config.swing_right,
+            swing_length=s_cfg.swing_length,
+            swing_left=s_cfg.swing_left,
+            swing_right=s_cfg.swing_right,
+            close_mitigation=s_cfg.close_mitigation,
+            join_consecutive_fvg=s_cfg.join_consecutive_fvg,
         )
         self.engine = VectorizedSMCEngine(engine_config)
         
+        # 初始化风险管理和策略 (默认值)
         risk_manager = RiskManager(
-            account_size=self.config.account_size,
-            risk_per_trade=self.config.risk_per_trade,
-            max_position_pct=self.config.max_position_pct,
+            account_size=100000.0,
+            risk_per_trade=0.02,
+            max_position_pct=0.10,
         )
-        self.signal_generator = SignalGenerator(risk_manager)
+        self.strategy = strategy or SignalGenerator(risk_manager)
         
         self.chart_builder = PremiumChartBuilder()
         
@@ -182,12 +156,12 @@ class SMCOrchestrator:
             # 1. 数据验证
             df = self._validate_data(df)
             
-            # 2. SMC 分析
+            # 2. SMC 分析 (核心引擎计算指标)
             output = self.engine.analyze(df, symbol=symbol, timeframe=timeframe)
             result.output = output
             
-            # 3. 信号生成
-            signal = self.signal_generator.generate(output, symbol=symbol, name=name)
+            # 3. 信号生成 (应用策略逻辑)
+            signal = self.strategy.generate_signal(output, symbol=symbol, name=name)
             result.signal = signal
             
             # 4. 图表生成
@@ -196,8 +170,8 @@ class SMCOrchestrator:
                 fig = self.chart_builder.build(
                     df, output, signal,
                     title=f"{symbol} {name} - SMC分析",
-                    height=self.config.chart_height,
-                    show_volume=self.config.show_volume,
+                    height=self.config.chart.height,
+                    show_volume=self.config.chart.show_volume,
                 )
                 self.chart_builder.save(fig, chart_path)
                 result.chart_path = chart_path
@@ -384,7 +358,7 @@ def analyze_from_file(
     symbol: str = None,
     name: str = "",
     timeframe: str = "daily",
-    config: Optional[OrchestratorConfig] = None,
+    config: Optional[AppConfig] = None,
 ) -> AnalysisResult:
     """
     从文件分析（便捷函数）

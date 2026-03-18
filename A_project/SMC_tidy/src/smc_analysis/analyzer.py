@@ -14,7 +14,11 @@ import pandas as pd
 # Suppress pkg_resources warning
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
-    from smartmoneyconcepts.smc import smc
+    try:
+        from smartmoneyconcepts.smc import smc
+    except ImportError:
+        smc = None
+        logging.warning("smartmoneyconcepts package not found, some legacy analyzer features may be disabled")
 
 from ..config import get_config, SMCConfig
 

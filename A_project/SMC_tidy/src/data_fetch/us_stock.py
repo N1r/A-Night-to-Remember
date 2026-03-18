@@ -6,11 +6,16 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Optional
 
 import pandas as pd
-import yfinance as yf
-
-from .base import BaseDataFetcher, DataFetchError
 
 logger = logging.getLogger(__name__)
+
+try:
+    import yfinance as yf
+except Exception:
+    yf = None
+    logger.warning("yfinance not installed or dependencies missing, US stock fetching will be unavailable")
+
+from .base import BaseDataFetcher, DataFetchError
 
 
 class USStockFetcher(BaseDataFetcher):
